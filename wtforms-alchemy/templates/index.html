@@ -1,0 +1,11 @@
+{% block content %}
+<div class="formwrapper">
+  <h2 class="title">Contact</h2>
+  <form method="POST" action="/">
+   <div class="form-field">{{ form.name.label }} {{ form.name(size=20) }}</div>
+        {% for l in form.locations %}
+        <div class="form-field">{{ l.name.label }} {{ l.name(size=20) }}</div> 
+        {% endfor %}
+  </form>
+</div>
+{% endblock %}
