@@ -13,7 +13,5 @@ from utils import check_file_exits
 
 def validate_file_exists(form, field):
     # get_shape_from_s3(field.data)
-    try:
-        check_file_exits(field.data)
-    except:
+    if not check_file_exits(field.data):
         raise ValidationError('File Not found')

@@ -9,7 +9,11 @@ Created on Mon Dec 23 14:51:24 2019
 import fiona
 from decouple import config
 import boto3
+from botocore.errorfactory import ClientError
 from session import db_session, base_classes
+from urlparse import urlparse
+# ParseResult(scheme='s3', netloc='bucket_name', path='/folder1/folder2/file1.json', params='', query='', fragment='')
+
 
 aws_access_key_id = config('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = config('AWS_SECRET_ACCESS_KEY')
@@ -66,6 +70,9 @@ def check_file_exits(file_location):
                           aws_access_key_id=aws_access_key_id,
                           aws_secret_access_key=aws_secret_access_key,
                           aws_session_token=S3_session_token)
-    bucket_name = get_bucket(client,)
-    client.head_object(Bucket='bucket_name', Key='file_path')
+    parsed = urlparse(file_location, allow_fragments=False)
+    bucket_name, key = parsed.netloc, parsed.path
+    result = client.list_objects(Bucket=bucket_name, Prefix=key)
     
+    return 'Contents' in result
+        
