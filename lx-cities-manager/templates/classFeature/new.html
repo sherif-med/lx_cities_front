@@ -1,0 +1,28 @@
+{% block content %}
+<div class="formwrapper">
+  <h2 class="title">Add Feature</h2>
+  <form method="POST" action="{{ url_for('feature') }}">
+  {{ form.csrf_token }}
+   <div class="form-field">{{ form.respective_city.label }} {{ form.respective_city }} </div>
+   {% if form.respective_city.errors %}
+        <ul class="errors">
+   {% for error in form.respective_city %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </ul>
+    {% endif %}
+            
+   <div class="form-field">{{ form.feature_name.label }} {{ form.feature_name }} </div>
+   {% if form.feature_name.errors %}
+        <ul class="errors">
+   {% for error in form.feature_name %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+   
+    {{ form.submit() }}
+  </form>
+</div>
+{% endblock %}

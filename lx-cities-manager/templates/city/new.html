@@ -1,0 +1,28 @@
+{% block content %}
+<div class="formwrapper">
+  <h2 class="title">Add City</h2>
+  <form method="POST" action="{{ url_for('city') }}">
+  {{ form.csrf_token }}
+   <div class="form-field">{{ form.full_name.label }} {{ form.full_name(size=20) }}</div>
+   {% if form.respective_city.errors %}
+        <ul class="errors">
+   {% for error in form.full_name.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </ul>
+    {% endif %}
+            
+   <div class="form-field">{{ form.foot_print_file_location.label }} {{ form.foot_print_file_location(size=20) }}</div>
+   {% if form.feature_name.errors %}
+        <ul class="errors">
+   {% for error in form.foot_print_file_location.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </ul>
+    {% endif %}
+            
+   
+    {{ form.submit() }}
+  </form>
+</div>
+{% endblock %}
