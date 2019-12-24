@@ -11,13 +11,35 @@ from decouple import config
 import boto3
 from botocore.errorfactory import ClientError
 from session import db_session, base_classes
-from urlparse import urlparse
+from urllib.parse import urlparse
 # ParseResult(scheme='s3', netloc='bucket_name', path='/folder1/folder2/file1.json', params='', query='', fragment='')
-
+import rasterio
 
 aws_access_key_id = config('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = config('AWS_SECRET_ACCESS_KEY')
 S3_session_token = config('S3_SESSION_TOKEN')
+
+def get_boto3_session():
+    
+    sess = boto3.session.Session(aws_access_key_id = aws_access_key_id,
+                     aws_secret_access_key = aws_secret_access_key,
+                     aws_session_token=S3_session_token)
+    return sess
+
+def get_raster_from_s3(file_location):
+    """
+    Loads tiff file from s3.
+    Args:
+        file_location : example: s3://bucket/file.tif
+    Returns:
+        
+    """
+    rasterio_obj = []
+    boto3_session = get_boto3_session()
+    with rasterio.Env(rasterio.session.AWSSession(boto3_session)):
+        print (f"Loading file {file_location}")
+        rasterio_obj = rasterio.open(file_location)
+    return rasterio_obj
 
 def get_shape_from_s3(file_location):
     """
@@ -28,10 +50,8 @@ def get_shape_from_s3(file_location):
         fiona_collection : fiona object conatining features
     """
     fiona_collection = []
-    with fiona.Env(session = fiona.session.AWSSession( 
-                     aws_access_key_id = aws_access_key_id,
-                     aws_secret_access_key = aws_secret_access_key,
-                     aws_session_token=S3_session_token)):
+    boto3_session = get_boto3_session()
+    with fiona.Env(session = fiona.session.AWSSession(boto3_session)):
         print(f"Loading file {file_location}")
         fiona_collection = fiona.open(file_location, driver="'ESRI Shapefile'")
     return fiona_collection
@@ -55,9 +75,9 @@ def get_class_features_factory(city_id):
         """
         class_features = db_session.query(base_classes["class_feature"]).filter(
                 base_classes["class_feature"].resp_city == city_id
-                )
+                ).all()
         return class_features
-    return get_class_features
+    return get_class_features(city_id)
     
     
     
@@ -75,4 +95,18 @@ def check_file_exits(file_location):
     result = client.list_objects(Bucket=bucket_name, Prefix=key)
     
     return 'Contents' in result
-        
+ 
+
+from functools import partial
+import pyproj
+from shapely.ops import transform
+
+def reproject_geom(geom, epsg_code, epsg_code_init='epsg:4326'):
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init=epsg_code_init.lower()), # source coordinate system
+        pyproj.Proj(init=epsg_code.lower())
+        )
+    projected_geom = transform(project, geom)
+    return projected_geom
+

@@ -1,0 +1,85 @@
+ <head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head> 
+
+{% block content %}
+<div class="formwrapper">
+  <h2 class="title">Add Image file</h2>
+  <form method="POST" action="{{ url_for('imageFile') }}">
+  {{ form.csrf_token }}
+  
+   <div class="form-field">{{ form.respective_city.label }} {{ form.respective_city }}</div>
+   {% if form.respective_city.errors %}
+        <ul class="errors">
+   {% for error in form.respective_city.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </ul>
+    {% endif %}
+            
+   <div class="form-field">{{ form.respective_feature.label }} {{ form.respective_feature }}</div>
+   {% if form.respective_feature.errors %}
+        <ul class="errors">
+   {% for error in form.respective_feature.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    
+    <div class="form-field">{{ form.image_file_location.label }} {{ form.image_file_location }}</div>
+   {% if form.image_file_location.errors %}
+        <ul class="errors">
+   {% for error in form.image_file_location.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </ul>
+    {% endif %}
+            
+   
+    {{ form.submit() }}
+  </form>
+</div>
+{% endblock %}
+
+<script charset="utf-8" type="text/javascript">
+
+$(function() {
+
+    // jQuery selection for the 2 select boxes
+    var dropdown = {
+        state: $('#respective_city'),
+        county: $('#respective_feature')
+    };
+
+    // call to update on load
+    updateFeatures();
+
+    // function to call XHR and update county dropdown
+    function updateFeatures() {
+        var send = {
+            city_id: dropdown.state.val()
+        };
+        dropdown.county.attr('disabled', 'disabled');
+        dropdown.county.empty();
+        $.getJSON("{{ url_for('_get_class_features') }}", send, function(data) {
+            data.forEach(function(item) {
+                dropdown.county.append(
+                    $('<option>', {
+                        value: item[0],
+                        text: item[1]
+                    })
+                );
+            });
+            dropdown.county.removeAttr('disabled');
+        });
+    }
+
+    // event listener to state dropdown change
+    dropdown.state.on('change', function() {
+        updateFeatures();
+    });
+
+});
+
+</script>

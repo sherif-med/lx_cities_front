@@ -28,6 +28,8 @@ boto3 = "*"
 python-decouple = "*"
 Fiona = "*"
 Shapely = "*"
+rasterio = {extras = ["s3"],version = "*"}
+pyproj = "*"
 
 [requires]
 python_version = "3.7"
